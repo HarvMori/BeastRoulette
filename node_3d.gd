@@ -8,7 +8,9 @@ var last_survived = true
 var player_health = 6
 var dealer_health = 6
 
-
+signal dealer_turn_ended
+signal player_turn_ended
+signal heath_updated
 func _ready():
 	print("test1")
 	load_bullets()
@@ -42,6 +44,7 @@ func dealer_turn(target):
 	if dealer_behavior == 50:
 		print("Дилер сделал ошибку!")
 		target = "Дилер"
+	dealer_turn_ended.emit()
 
 func player_turn(target):
 	if bull.size() > 0:
@@ -50,15 +53,23 @@ func player_turn(target):
 			print("Выстрел целым патроном!")
 			if target == "Игрок":
 				player_health -= 1
+				heath_updated.emit()
+				player_turn_ended.emit()
 				if player_health <= 0:
 					return
+				
 			elif target == "Дилер":
 				dealer_health -= 1
+				player_turn_ended.emit()
+				heath_updated.emit()
 				if dealer_health <= 0:
 					return
 		else:
 			print("Клик! Пустой патрон.")
 			dealer_turn(target) # Добавлен вызов функции dealer_turn с аргументом target
+			
 	else:
+		player_turn_ended.emit()
 		print("Патроны закончились! Игра окончена.")
 
+	

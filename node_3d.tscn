@@ -1,8 +1,9 @@
-[gd_scene load_steps=16 format=3 uid="uid://cdl1lhp8pyh12"]
+[gd_scene load_steps=17 format=3 uid="uid://cdl1lhp8pyh12"]
 
 [ext_resource type="Script" path="res://node_3d.gd" id="1_4xr2m"]
 [ext_resource type="Script" path="res://PlayerTargetUI.gd" id="1_tqgu2"]
 [ext_resource type="PackedScene" uid="uid://bsyc5dd1kh1xy" path="res://panel.tscn" id="2_qg08a"]
+[ext_resource type="Script" path="res://health_label.gd" id="4_v4m1x"]
 
 [sub_resource type="Animation" id="Animation_pvt42"]
 length = 0.001
@@ -173,5 +174,27 @@ layout_mode = 2
 action_mode = 0
 text = "Игрок"
 
+[node name="DealerHealth" type="Label" parent="Panel" node_paths=PackedStringArray("main_node")]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -3.316
+anchor_top = -9.143
+anchor_right = -3.316
+anchor_bottom = -9.143
+offset_left = 41.4241
+offset_top = 286.73
+offset_right = 413.424
+offset_bottom = 350.73
+text = "Здоровье :"
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("4_v4m1x")
+main_node = NodePath("../..")
+
+[connection signal="dealer_turn_ended" from="." to="Panel" method="show_selection_buttons"]
+[connection signal="dealer_turn_ended" from="." to="Panel/DealerHealth" method="update_health"]
+[connection signal="heath_updated" from="." to="Panel/DealerHealth" method="update_health"]
+[connection signal="player_turn_ended" from="." to="Panel" method="show_selection_buttons"]
+[connection signal="player_made_choice" from="Panel" to="." method="player_turn"]
 [connection signal="pressed" from="Panel/VBoxContainer3/Dealer_button" to="Panel" method="_on_dealer_button_pressed"]
 [connection signal="pressed" from="Panel/VBoxContainer4/Player_button" to="Panel" method="_on_player_button_pressed"]

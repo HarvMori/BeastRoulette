@@ -15,13 +15,13 @@ func _ready():
 
 func _on_dealer_button_pressed():
 	self.player_target = "Дилер"
-	emit_signal("player_made_choice", player_target)
 	hide_selection_buttons() # Скрываем кнопки после выбора
+	emit_signal("player_made_choice", player_target)
 
 func _on_player_button_pressed():
 	self.player_target = "Игрок"
-	emit_signal("player_made_choice", player_target)
 	hide_selection_buttons() # Скрываем кнопки после выбора
+	emit_signal("player_made_choice", player_target)
 
 # Функция для скрытия кнопок выбора
 func hide_selection_buttons():
@@ -29,3 +29,6 @@ func hide_selection_buttons():
 	player_button.hide()
 
 # Остальные функции остаются без изменений
+func show_selection_buttons():
+	dealer_button.show()
+	player_button.show()
