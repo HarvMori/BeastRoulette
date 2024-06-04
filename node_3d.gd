@@ -70,6 +70,7 @@ func player_turn(target):
 			
 	else:
 		player_turn_ended.emit()
-		print("Патроны закончились! Игра окончена.")
+		print("Патроны закончились!")
+		load_bullets()
 
 	
