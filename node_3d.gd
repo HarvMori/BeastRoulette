@@ -1,7 +1,7 @@
 extends Node3D
 
 # Инициализация переменных
-var bull = [true, false] # Пример начального состояния пуль
+var bull = [false, true, true] # Пример начального состояния пуль
 var bullets_num = 4
 var targets = ["Игрок", "Дилер"]
 var last_survived = true
@@ -11,6 +11,7 @@ var dealer_health = 6
 signal dealer_turn_ended
 signal player_turn_ended
 signal heath_updated
+
 func _ready():
 	print("test1")
 	load_bullets()
@@ -27,50 +28,131 @@ func load_bullets():
 
 func dealer_turn(target):
 	var risk_level = bull.count(true) / float(bull.size())
-	if dealer_health >= 3:
+	if dealer_health <= 3:
 		risk_level -= 0.1
 	else:
 		risk_level += 0.1
 	var dealer_behavior = randi() % 100
-	if dealer_behavior < 30:
+	if dealer_behavior < 40:
 		print("Дилер кажется нервным.")
 		risk_level -= 0.1 
-	elif dealer_behavior > 70:
+	elif dealer_behavior > 80:
 		print("Дилер выглядит уверенно.")
 		risk_level += 0.1 
 	if last_survived and risk_level < 0.7:
 		risk_level += 0.2 
+	last_survived = true
 	print("Цель дилера: ", target)
 	if dealer_behavior == 50:
 		print("Дилер сделал ошибку!")
 		target = "Дилер"
-	dealer_turn_ended.emit()
-
-func player_turn(target):
-	if bull.size() > 0:
+	if dealer_health < 1:
+		if bull.count(true):
+			target = "Игрок"
+		else:
+			target = "Дилер"
+	elif risk_level > 0.5:
+		target = "Игрок"
+	else:
+		target = "Дилер"
+	print("Уровень риска: ", risk_level)
+	print(bull.count(true))
+	if bull.size() > 0 and bull.count(true) > 0:
 		var bullet = bull.pop_front()
 		if bullet:
-			print("Выстрел целым патроном!")
 			if target == "Игрок":
+				print("Дилер стреляет в вас!")
+				print("Патроны: ", bull)
 				player_health -= 1
 				heath_updated.emit()
-				player_turn_ended.emit()
+				dealer_turn_ended.emit()
 				if player_health <= 0:
 					return
+				target = null
+				player_turn(target)
 				
 			elif target == "Дилер":
+				print("Дилер стреляет в себя! Ауч!")
+				print("Патроны: ", bull)
 				dealer_health -= 1
-				player_turn_ended.emit()
+				last_survived = false
+				dealer_turn_ended.emit()
 				heath_updated.emit()
 				if dealer_health <= 0:
 					return
+				target = null
+				player_turn(target)
 		else:
-			print("Клик! Пустой патрон.")
-			dealer_turn(target) # Добавлен вызов функции dealer_turn с аргументом target
+			if target == "Игрок":
+				print("Патроны: ", bull)
+				print("Клик! Вам повезло!.")
+				player_turn(target)
+				target = null
+				dealer_turn_ended.emit()
+			elif target == "Дилер":
+				print("Клик! Дилер ходит снова..")
+				dealer_turn_ended.emit()
+				target = null
+				dealer_turn(target)
+				return
 			
 	else:
 		player_turn_ended.emit()
-		print("Патроны закончились!")
+		if bull.count(true) <= 0:
+			print("Нету целых патронов1!")
+			bull = [false, true]
+		else:
+			print("Патроны закончились!")
+			bull = [false, true]
+		load_bullets()
+
+
+func player_turn(target):
+	if bull.size() > 0 and bull.count(true) > 0:
+		var bullet = bull.pop_front()
+		if bullet:
+			if target == "Игрок":
+				print("Вы стреляете в себя!")
+				print("Патроны у вас: ", bull)
+				player_health -= 1
+				heath_updated.emit()
+				player_turn_ended.emit()
+				target = null
+				dealer_turn(target)
+				
+			elif target == "Дилер":
+				print("Вы стреляете в Дилера!")
+				print("Патроны у вас: ", bull)
+				dealer_health -= 1
+				last_survived = false
+				player_turn_ended.emit()
+				heath_updated.emit()
+				target = null
+				dealer_turn(target)
+		else:
+			if target == "Игрок":
+				print("Клик! Вы знали!!.")
+				print("Патроны у вас: ", bull)
+				player_turn_ended.emit() 
+				target = null
+				player_turn(target)
+				return
+			elif target == "Дилер":
+				print("Клик! Сегодня не ваш день.")
+				print("Патроны у вас: ", bull)
+				player_turn_ended.emit()
+				target = null
+				dealer_turn(target)
+
+			
+	else:
+		player_turn_ended.emit()
+		if bull.count(true) <= 0:
+			print("Нету целых патронов!")
+			bull = [false, true]
+		else:
+			print("Патроны закончились!")
+			bull = [false, true]
 		load_bullets()
 
 	
